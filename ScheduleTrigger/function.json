@@ -1,0 +1,18 @@
+{
+  "bindings": [
+    {
+      "name": "Request",
+      "type": "httpTrigger",
+      "direction": "in",
+      "authLevel": "function",
+      "methods": [
+        "post"
+      ]
+    },
+    {
+      "name": "durableClient",
+      "type": "durableClient",
+      "direction": "in"
+    }
+  ]
+}
