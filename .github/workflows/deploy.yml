@@ -25,6 +25,16 @@ jobs:
                   tenant-id: ${{ secrets.AZURE_TENANT_ID }}
                   subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+            - name: Verify Azure context
+              shell: pwsh
+              run: |
+                  az account show --query "{name:name,id:id,tenantId:tenantId}" -o table
+                  az functionapp show `
+                      --name favdieus01 `
+                      --resource-group rgvdieus01 `
+                      --query "{name:name,id:id}" `
+                      -o table
+
             - name: Deploy Function App
               uses: Azure/functions-action@v1
               with:
