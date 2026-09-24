@@ -25,6 +25,24 @@ jobs:
                   tenant-id: ${{ secrets.AZURE_TENANT_ID }}
                   subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+            - name: Capture Azure resources
+              shell: pwsh
+              run: |
+                  az account show -o json > azure-account.json
+                  az group list -o json > azure-resource-groups.json
+                  az resource list -o json > azure-resources.json
+                  az functionapp list -o json > azure-function-apps.json
+
+            - name: Upload Azure diagnostics
+              uses: actions/upload-artifact@v4
+              with:
+                  name: azure-diagnostics
+                  path: |
+                      azure-account.json
+                      azure-resource-groups.json
+                      azure-resources.json
+                      azure-function-apps.json
+
             - name: Deploy Function App
               uses: Azure/functions-action@v1
               with:
