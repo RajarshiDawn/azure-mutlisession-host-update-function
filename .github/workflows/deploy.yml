@@ -18,6 +18,36 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v6
 
+            # ============================================================
+            # PowerShell static analysis
+            # ============================================================
+            - name: Install PSScriptAnalyzer
+              shell: pwsh
+              run: |
+                  Install-Module PSScriptAnalyzer `
+                      -Scope CurrentUser `
+                      -Force `
+                      -AllowClobber
+
+            - name: Run PSScriptAnalyzer
+              shell: pwsh
+              run: |
+                  $results = Invoke-ScriptAnalyzer `
+                      -Path . `
+                      -Recurse `
+                      -Severity Error,Warning
+
+                  if ($results) {
+                      $results | Format-Table -AutoSize
+                      Write-Error "PSScriptAnalyzer found PowerShell issues."
+                      exit 1
+                  }
+
+                  Write-Host "PSScriptAnalyzer passed successfully."
+
+            # ============================================================
+            # Azure authentication
+            # ============================================================
             - name: Login to Azure
               uses: azure/login@v3
               with:
@@ -25,6 +55,9 @@ jobs:
                   tenant-id: ${{ secrets.AZURE_TENANT_ID }}
                   subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+            # ============================================================
+            # Azure diagnostics
+            # ============================================================
             - name: Capture Azure resources
               shell: pwsh
               run: |
@@ -43,6 +76,9 @@ jobs:
                       azure-resources.json
                       azure-function-apps.json
 
+            # ============================================================
+            # Deployment
+            # ============================================================
             - name: Deploy Function App
               uses: Azure/functions-action@v1
               with:
